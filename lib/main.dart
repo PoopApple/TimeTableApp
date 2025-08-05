@@ -366,7 +366,7 @@ class TTAppBar extends StatelessWidget implements PreferredSizeWidget{
       ),
     );
 
-    
+    //
     var prevbut = TextButton( onPressed: ttState.prevDay,style: ButtonStyle(alignment: Alignment.centerRight,overlayColor: WidgetStateColor.transparent), child: Text("<<<<<<")); //style: ButtonStyle(overlayColor: WidgetStateColor.transparent) ,
     var nextbut = TextButton( onPressed: ttState.nextDay,style: ButtonStyle(alignment: Alignment.centerLeft,overlayColor: WidgetStateColor.transparent) ,child: Text(">>>>>>"),);
     var todaybut = TextButton( onPressed: ttState.setToday,style: ButtonStyle(alignment: Alignment.center,overlayColor: WidgetStateColor.transparent) ,child: Text("today"),);
