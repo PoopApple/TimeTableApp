@@ -1,0 +1,693 @@
+//import 'package:english_words/english_words.dart';
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_application_2/utils/themes/themes.dart';
+import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
+
+
+
+// String _colorToHex(Color color) {
+//   return 'Color(0x${color.value.toRadixString(16).padLeft(8, '0')}';
+// }
+
+// void _printScheme(ColorScheme scheme) {
+//   print('primary: ${_colorToHex(scheme.primary)}');
+//   print('onPrimary: ${_colorToHex(scheme.onPrimary)}');
+//   print('primaryContainer: ${_colorToHex(scheme.primaryContainer)}');
+//   print('onPrimaryContainer: ${_colorToHex(scheme.onPrimaryContainer)}');
+//   print('secondary: ${_colorToHex(scheme.secondary)}');
+//   print('onSecondary: ${_colorToHex(scheme.onSecondary)}');
+//   print('secondaryContainer: ${_colorToHex(scheme.secondaryContainer)}');
+//   print('onSecondaryContainer: ${_colorToHex(scheme.onSecondaryContainer)}');
+//   print('tertiary: ${_colorToHex(scheme.tertiary)}');
+//   print('onTertiary: ${_colorToHex(scheme.onTertiary)}');
+//   print('tertiaryContainer: ${_colorToHex(scheme.tertiaryContainer)}');
+//   print('onTertiaryContainer: ${_colorToHex(scheme.onTertiaryContainer)}');
+//   print('error: ${_colorToHex(scheme.error)}');
+//   print('onError: ${_colorToHex(scheme.onError)}');
+//   print('errorContainer: ${_colorToHex(scheme.errorContainer)}');
+//   print('onErrorContainer: ${_colorToHex(scheme.onErrorContainer)}');
+//   print('background: ${_colorToHex(scheme.background)}');
+//   print('onBackground: ${_colorToHex(scheme.onBackground)}');
+//   print('surface: ${_colorToHex(scheme.surface)}');
+//   print('onSurface: ${_colorToHex(scheme.onSurface)}');
+//   print('surfaceVariant: ${_colorToHex(scheme.surfaceVariant)}');
+//   print('onSurfaceVariant: ${_colorToHex(scheme.onSurfaceVariant)}');
+//   print('outline: ${_colorToHex(scheme.outline)}');
+//   print('shadow: ${_colorToHex(scheme.shadow)}');
+//   print('inverseSurface: ${_colorToHex(scheme.inverseSurface)}');
+//   print('onInverseSurface: ${_colorToHex(scheme.onInverseSurface)}');
+//   print('inversePrimary: ${_colorToHex(scheme.inversePrimary)}');
+//   print('surfaceTint: ${_colorToHex(scheme.surfaceTint)}');
+// }
+
+void main() {
+  // const seed = Color.fromARGB(255, 33, 41, 63);
+  // final light = ColorScheme.fromSeed(seedColor: seed, brightness: Brightness.light);
+  // final dark = ColorScheme.fromSeed(seedColor: seed, brightness: Brightness.dark);
+  // print('--- Light Scheme ---');
+  // _printScheme(light);
+  // print('\n--- Dark Scheme ---');
+  // _printScheme(dark);
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (context) => MyAppState(),
+      child: MaterialApp(
+        title: 'Mera App',
+        themeMode: ThemeMode.system,
+        theme: PoopAppTheme.lightTheme,
+        darkTheme: PoopAppTheme.darkTheme,
+        home: MyHomePage(),
+      ),
+    );
+  }
+}
+
+//app state is memory remain same after hot reload
+class MyAppState extends ChangeNotifier {
+  int number = 0;
+  bool darkMode = false;
+
+  void nextNum() {
+    number++;
+    notifyListeners();
+  }
+
+  void prevNum() {
+    number--;
+    notifyListeners();
+  }
+
+  var stored = <int>[];
+
+  void insertInIncreasingOrder(List<int> stored, int numb) {
+    int i = 0;
+
+    if (stored.isNotEmpty) {
+      while (i < stored.length && stored[i] < numb) {
+        ++i;
+      }
+    }
+
+    stored.insert(i, numb);
+    // -5 -3 -2- 1 22
+  }
+
+  void toggleStore() {
+    if (stored.contains(number)) {
+      print("removed $number");
+      stored.remove(number);
+    } else {
+      print("stored $number");
+      insertInIncreasingOrder(stored, number);
+    }
+    notifyListeners();
+  }
+
+  void removeNumb(int numb) {
+    stored.remove(numb);
+    print("removed $number");
+    notifyListeners();
+  }
+
+  bool containsNum() {
+    return stored.contains(number);
+  }
+}
+
+// is reloaded after hot reload
+// everythingin build() reloads
+
+//but with notifyListeners()  it updates becase we .watch<myappstate>
+class MyHomePage extends StatefulWidget {
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  var selectedIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    Widget page;
+    switch (selectedIndex) {
+      case 0:
+        page = ChangeNotifierProvider(create: (_) => TTState(), child: TT());
+
+      case 1:
+        page = Counter();
+
+      case 2:
+        page = Liked();
+
+      default:
+        throw UnimplementedError('no widget for $selectedIndex');
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: AppBarTitleText(),
+        backgroundColor: theme.colorScheme.surface,
+      ),
+      body: page,
+      bottomNavigationBar: NavigationBar(
+        destinations: [
+          NavigationDestination(
+            icon: Icon(Icons.calendar_month_rounded),
+            label: 'TT',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.exposure_plus_1),
+            label: 'Counter',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.featured_play_list_rounded),
+            label: 'Extra',
+          ),
+        ],
+        selectedIndex: selectedIndex,
+
+        onDestinationSelected: (value) {
+          setState(() {
+            selectedIndex = value;
+          });
+        },
+      ),
+    );
+  }
+}
+/*
+Row(
+        children: [
+          SafeArea(
+            child: NavigationBar(
+              destinations: [
+                NavigationDestination(icon: Icon(Icons.exposure_plus_1), label: "Counter"),
+                NavigationDestination(icon: Icon(Icons.home), label: "trial"),
+              ],
+              selectedIndex: 0,
+              onDestinationSelected: (value) {
+                print('selected: $value');
+              },
+
+              
+            )
+          ),
+
+          Expanded(
+            child: Container(
+              color: theme.colorScheme.primaryContainer,
+              child: Counter(),
+
+
+            ) 
+            ),
+        ],
+      ),
+*/
+
+class TtTempData {
+  static int numOfPeriod = 9;
+  static List<String> periods = [
+    "08:00",
+    "09:00",
+    "10:00",
+    "11:00",
+    "12:00",
+    "13:00",
+    "14:00",
+    "15:00",
+    "16:00",
+  ];
+}
+
+extension TimeOfDayExtension on TimeOfDay {
+  int compareTo(TimeOfDay other) {
+    if (hour < other.hour) return -1;
+    if (hour > other.hour) return 1;
+    if (minute < other.minute) return -1;
+    if (minute > other.minute) return 1;
+    return 0;
+  }
+
+  TimeOfDay add(TimeOfDay other){
+    int hr = (hour+other.hour)%24;
+    int mi = (minute + other.minute)%60;
+    return replacing(hour: hr , minute: mi);
+  }
+
+  TimeOfDay subtract(TimeOfDay other){
+    int hr = (24 + hour-other.hour)%24;
+    int mi = (60 + minute - other.minute)%60;
+    return replacing(hour: hr , minute: mi);
+  }
+
+}
+
+class TTState extends ChangeNotifier {
+  double rowHeight = 100;
+  TimeOfDay start = TimeOfDay(hour: 8, minute: 0);
+  TimeOfDay gap = TimeOfDay(hour: 1, minute: 0);
+
+  
+  void changeHeight(double hei) {
+    rowHeight = hei;
+    notifyListeners();
+  }
+  
+  TimeOfDay getnext(){
+    TimeOfDay next = start;
+    next.add(gap);
+    return next;
+  }
+}
+
+class TT extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    int day = 0;
+
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          TtHeading(theme: theme),
+          TTStack(),
+
+          //NOTE -- want to know how to handle changin of timetable
+          //do it later for now just make the format using for loops
+          //ElevatedButton(onPressed: (){}, child: child)
+
+          // Divider(
+          //   height: 10,
+          //   color: theme.colorScheme.outlineVariant,
+          //   thickness: 1,
+          //   indent : 10,
+          //   endIndent : 10,
+          //    ),
+          // SizedBox(height: 10),
+          // horizontalDividerTT(theme),
+          // TimePeriodRow(),
+          // horizontalDividerTT(theme),
+          // TimePeriodRow(),
+          // horizontalDividerTT(theme),
+        ],
+      ),
+    );
+  }
+}
+
+class TTStack extends StatelessWidget {
+  const TTStack({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    var ttState = context.watch<TTState>();
+    Color linecolor = theme.colorScheme.outlineVariant.withAlpha(50);
+    return Padding(
+      padding: const EdgeInsets.only(left: 3, right: 3, bottom: 3, top: 15),
+      child: Stack(
+        children: [
+          CustomPaint(
+            painter: LinesAndTextBG(ttState: ttState, linecolor: linecolor),
+            child: getTimes(ttState),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Column getTimes(TTState ttState) {
+    final double heightOfRow = 100;
+
+    return Column(
+      children: [
+        getTimeLabel(ttState, heightOfRow),
+        getTimeLabel(ttState, heightOfRow),
+        getTimeLabel(ttState, heightOfRow),
+      ],
+    );
+  }
+
+  IntrinsicHeight getTimeLabel(TTState ttState, double heightOfRow) {
+    return IntrinsicHeight(
+      child: Row(
+        children: [
+          Expanded(
+            flex: 15,
+            child: Container(
+              height: ttState.rowHeight,
+              alignment: Alignment.topCenter,
+              child: Text("8:00 AM", style: TextStyle(fontSize: 10)),
+            ),
+          ),
+
+          Expanded(flex: 85, child: SizedBox()),
+        ],
+      ),
+    );
+  }
+}
+
+class LinesAndTextBG extends CustomPainter {
+  final Color linecolor;
+  TTState ttState;
+  LinesAndTextBG({required this.ttState, required this.linecolor});
+  @override
+  void paint(Canvas canvas, Size size) {
+    final linePaint = Paint()
+      ..color = linecolor
+      ..strokeWidth = 2;
+
+    // draw vertical lines
+    // for (double x = 0; x <= size.width; x += 40) {
+    //   canvas.drawLine(Offset(x, 0), Offset(x, size.height), linePaint);
+    // }
+
+    canvas.drawLine(
+      Offset(size.width * 0.15, 0),
+      Offset(size.width * 0.15, size.height),
+      linePaint,
+    );
+
+    // draw diagonal lines
+    for (double y = 0; y <= size.height; y += ttState.rowHeight) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), linePaint);
+    }
+
+    // draw big background text
+    final textStyle = TextStyle(
+      color: Colors.grey.withOpacity(0.1),
+      fontSize: 100,
+      fontWeight: FontWeight.bold,
+    );
+    final textSpan = TextSpan(text: 'BG SCROLL', style: textStyle);
+    //final textPainter = TextPainter(text: textSpan, textDirection: TextDirection.ltr);
+    // textPainter.layout();
+    // textPainter.paint(canvas, Offset(20, size.height - 300));
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class TtHeading extends StatelessWidget {
+  const TtHeading({super.key, required this.theme});
+
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.secondaryContainer,
+        border: Border(bottom: BorderSide(color: theme.colorScheme.onSurface)),
+      ),
+
+      width: double.infinity,
+
+      child: Center(child: Text("TT bhi h ez if i put it on (an app)")),
+    );
+  }
+}
+
+Widget horizontalDividerTT(ThemeData theme) {
+  return Divider(
+    height: 10,
+    color: theme.colorScheme.outlineVariant.withAlpha(50),
+    thickness: 1,
+    indent: 50,
+    endIndent: 3,
+  );
+}
+
+class Liked extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    var appState = context.watch<MyAppState>();
+    List<int> likedList = appState.stored;
+
+    return Column(
+      children: [
+        Text("data"),
+        NumberGrid(likedList: likedList, appState: appState, theme: theme),
+      ],
+    );
+  }
+}
+
+class NumberGrid extends StatelessWidget {
+  const NumberGrid({
+    super.key,
+    required this.likedList,
+    required this.appState,
+    required this.theme,
+  });
+
+  final List<int> likedList;
+  final MyAppState appState;
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Flexible(
+      child: GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: 5,
+          mainAxisSpacing: 5,
+        ),
+        itemCount: likedList.length,
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextButton(
+              onPressed: () {
+                print("short");
+              },
+              onLongPress: () {
+                print("long");
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return deletePrompt(context, appState, likedList, index);
+                  },
+                );
+              },
+              style: ButtonStyle(
+                backgroundColor: WidgetStatePropertyAll<Color>(
+                  theme.colorScheme.primaryContainer,
+                ),
+                shape: WidgetStatePropertyAll<OutlinedBorder>(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
+              ),
+              child: Text(
+                "${likedList.elementAt(index)}",
+                style: TextStyle(color: Colors.white, fontSize: 30),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  AlertDialog deletePrompt(
+    BuildContext context,
+    MyAppState appState,
+    List<int> likedList,
+    int index,
+  ) {
+    return AlertDialog(
+      // To display the title it is optional
+      title: Text('DELETE'),
+      // Message which will be pop up on the screen
+      content: Text(
+        'Are you sure you want to unlike <${likedList.elementAt(index)}> ?',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: Text('NO'),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+            appState.removeNumb(likedList.elementAt(index));
+          },
+          child: Text('YES'),
+        ),
+      ],
+    );
+  }
+}
+
+class Counter extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
+    int counter_ = appState.number;
+
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        verticalDirection: VerticalDirection.down,
+        children: [
+          TextOfCounter(counter_: counter_),
+          ButtonsOfCounter(appState: appState),
+          SizedBox(height: 50),
+        ],
+      ),
+    );
+  }
+}
+
+class ButtonsOfCounter extends StatelessWidget {
+  const ButtonsOfCounter({super.key, required this.appState});
+
+  final MyAppState appState;
+
+  @override
+  Widget build(BuildContext context) {
+    int n = appState.number;
+    bool isStored = appState.containsNum();
+    double paddingInBetweenButtons = 20;
+
+    IconData likeIcon;
+    if (isStored) {
+      likeIcon = Icons.favorite;
+    } else {
+      likeIcon = Icons.favorite_border;
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(7.0),
+
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ElevatedButton(
+            onPressed: () {
+              appState.prevNum();
+              print(n);
+            },
+            child: Text('Prev'),
+          ),
+          SizedBox(width: paddingInBetweenButtons),
+
+          ElevatedButton(
+            onPressed: () {
+              print('button pressed!');
+              appState.nextNum();
+              print(n);
+            },
+            child: Text('Next'),
+          ),
+          SizedBox(width: paddingInBetweenButtons),
+
+          GestureDetector(
+            onTap: () {
+              print('tap button pressed!');
+              appState.nextNum();
+              print(n);
+            },
+            /*onLongPressStart: (){
+              print("started long");
+            },*/
+            child: Text('Next'),
+          ),
+          SizedBox(width: paddingInBetweenButtons),
+
+          ElevatedButton.icon(
+            icon: Icon(likeIcon),
+            label: Text(isStored ? "Unlike" : " Like "),
+            onPressed: () {
+              print('toggle fav for $n');
+              appState.toggleStore();
+            },
+            //child: Text('Fav ' + (isStored?"♥":"♡")),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class TextOfCounter extends StatelessWidget {
+  const TextOfCounter({super.key, required this.counter_});
+
+  final int counter_;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textStyleLarge = theme.textTheme.displayLarge!.copyWith(
+      color: theme.colorScheme.onPrimary,
+    );
+    final textStyleSmall = theme.textTheme.displaySmall!.copyWith(
+      color: theme.colorScheme.onPrimary,
+    );
+    return Card(
+      color: theme.colorScheme.primaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: RichText(
+          textAlign: TextAlign.center,
+          text: TextSpan(
+            style: TextStyle(color: Colors.black, fontSize: 15),
+            children: [
+              TextSpan(text: "A counter\n", style: textStyleSmall),
+              TextSpan(text: counter_.toString(), style: textStyleLarge),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class AppBarTitleText extends StatelessWidget {
+  const AppBarTitleText({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return RichText(
+      text: TextSpan(
+        children: [
+          TextSpan(
+            text: "Notes",
+            style: TextStyle(
+              color: theme.colorScheme.onSurface,
+            ), //TextStyle(color: Colors.white),
+          ),
+          TextSpan(
+            text: "++",
+            style: TextStyle(color: theme.colorScheme.primary),
+          ),
+        ],
+        // default style
+        style: TextStyle(fontSize: 18),
+      ),
+    );
+  }
+}
